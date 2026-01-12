@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import MainForm from './components/mainForm'
 
+type State = 'form' | 'countdown' | 'reading' | 'finished'
+
 function App() {
   const [countdown, setCountdown] = useState<number>(3)
 
@@ -8,9 +10,21 @@ function App() {
   const [splittedText, setSplittedText] = useState<string[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(0)
 
-  const [state, setState] = useState<
-    'form' | 'countdown' | 'reading' | 'finished'
-  >('form')
+  const [state, setState] = useState<State>('form')
+
+  function onStateChange(newState: State) {
+    if (newState === 'finished') {
+      setState('form')
+      setCountdown(3)
+      setCurrentWordIndex(0)
+      setSplittedText([])
+      setText('')
+    }
+  }
+
+  useEffect(() => {
+    onStateChange(state)
+  }, [state])
 
   useEffect(() => {
     if (state != 'reading') return
