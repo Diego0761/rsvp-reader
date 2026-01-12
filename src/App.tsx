@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import MainForm from './components/mainForm'
 
 function App() {
@@ -12,19 +12,30 @@ function App() {
     'form' | 'countdown' | 'reading' | 'finished'
   >('form')
 
+  useEffect(() => {
+    if (state != 'reading') return
+
+    const interval = setInterval(() => {
+      setCurrentWordIndex(prev => {
+        if (prev + 1 >= splittedText.length) {
+          endReading()
+          clearInterval(interval)
+          return prev
+        }
+        return prev + 1
+      })
+    }, 250)
+
+    return () => clearInterval(interval)
+  }, [state])
+
   const SubmitForm = () => {
-    //setFormVisibility(false)
     StartCountdown()
     setSplittedText(text.split(' '))
   }
 
   const startReading = () => {
     setState('reading')
-    console.log(splittedText)
-    console.log(text)
-    setInterval(() => {
-      setCurrentWordIndex(currentWordIndex + 1)
-    }, 600)
   }
 
   const StartCountdown = () => {
