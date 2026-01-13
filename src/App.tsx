@@ -14,11 +14,11 @@ function App() {
 
   function onStateChange(newState: State) {
     if (newState === 'finished') {
-      setState('form')
       setCountdown(3)
       setCurrentWordIndex(0)
       setSplittedText([])
       setText('')
+      setState('form')
     }
   }
 
