@@ -34,6 +34,7 @@ function MainForm(props: Props) {
         <textarea
           id="input"
           name="input"
+					placeholder='Insert Text'
           rows={15}
           cols={70}
           className="bg-emerald-200 focus:ring-2 ring-emerald-100 outline-none px-4 py-4 text-2xl rounded-md resize-none transition"
