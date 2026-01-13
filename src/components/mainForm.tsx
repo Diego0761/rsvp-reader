@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import { DiceFiveIcon, GearIcon, XIcon } from '@phosphor-icons/react'
+import { useEffect, useState } from 'react'
+import { DiceFiveIcon, GearIcon } from '@phosphor-icons/react'
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
   DialogTitle
 } from '@headlessui/react'
+import texts from '../stories.json'
 
 interface Props {
   submitForm: () => void
   getText: (text: string) => void
+  setWpm: (wpm: number) => void
 }
-
-import texts from '../stories.json'
 
 function MainForm(props: Props) {
   const [text, setText] = useState<string>('')
@@ -20,7 +20,11 @@ function MainForm(props: Props) {
   const randomText = () => {
     const randomIndex = Math.floor(Math.random() * texts.length)
     setText(texts[randomIndex])
-		props.getText(texts[randomIndex])
+    props.getText(texts[randomIndex])
+  }
+
+  function onWpmChange(newWpm: number) {
+    props.setWpm(newWpm)
   }
 
   return (
@@ -52,22 +56,34 @@ function MainForm(props: Props) {
               props.getText(text)
               props.submitForm()
             }}
-            className="bg-emerald-500 text-white p-4 rounded-md cursor-pointer flex justify-center items-center w-full transition hover:bg-emerald-600 outline-none focus:ring-2 ring-emerald-200"
+            className="bg-emerald-500 text-white p-4 rounded-md cursor-pointer flex justify-center items-center w-full transition hover:bg-emerald-600 outline-none focus:ring-2 ring-emerald-200 text-2xl"
           >
             Start
           </button>
 
-          <Modal />
+          <Modal setWpm={wpm => onWpmChange(wpm)} />
         </div>
       </div>
     </div>
   )
 }
 
-function Modal() {
+type ModalProps = {
+  setWpm: (amount: number) => void
+}
+
+function Modal(props: ModalProps) {
   const [open, setOpen] = useState(false)
 
   const [wpm, setWpm] = useState(200)
+
+  useEffect(() => {
+    const storedWpm = localStorage.getItem('wpm')
+    if (storedWpm) {
+      setWpm(Number(storedWpm))
+      props.setWpm(Number(storedWpm))
+    }
+  }, [])
 
   function onWpmChange(newWpm: string) {
     if (isNaN(Number(newWpm))) return
@@ -124,7 +140,11 @@ function Modal() {
               <div className="bg-gray-700/25 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                 <button
                   type="button"
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    props.setWpm(wpm)
+                    localStorage.setItem('wpm', wpm.toString())
+                    setOpen(false)
+                  }}
                   className="inline-flex w-full justify-center rounded-md bg-emerald-500 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-emerald-600 cursor-pointer sm:ml-3 sm:w-auto"
                 >
                   Save
