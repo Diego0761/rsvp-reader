@@ -1,3 +1,6 @@
+## TODO
+All words are being displayed at the same time, currently working on timing based on word, pontuation, and word frequency.
+
 ## What is RSVP?
 RSVP is a technique that shows words one-by-one in the same spot to reduce eye movement and increase reading speed.
 
