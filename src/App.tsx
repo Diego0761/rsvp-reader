@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import MainForm from './components/mainForm'
+import commonWords from './wordprocessing/highfrequency.json'
 
 type State = 'form' | 'countdown' | 'reading' | 'finished'
 
@@ -21,6 +22,51 @@ function App() {
       setText('')
       setState('form')
     }
+  }
+
+  function processText(input: string[], desiredWPM: number) {
+    const timedText: { word: string; time: number }[] = []
+
+    const basetime = 60
+    const timeperchar = basetime / 5
+    const commonpunish = -40
+    const pontuationbonus = 50
+
+    let totalTime = 0
+
+    input.forEach(word => {
+      let time = word.length * timeperchar + basetime
+
+      totalTime += time
+
+      if (commonWords.includes(word.toLowerCase())) {
+        time += commonpunish
+        totalTime += commonpunish
+      }
+
+      if (word.endsWith(',') || word.endsWith(';')) {
+        time += pontuationbonus
+        totalTime += pontuationbonus
+      } else if (
+        word.endsWith('.') ||
+        word.endsWith('!') ||
+        word.endsWith('?')
+      ) {
+        time += pontuationbonus * 2
+        totalTime += pontuationbonus * 2
+      }
+
+      timedText.push({ word, time})
+    })
+
+    const trueWPM = input.length * 60000 / totalTime
+    const scaledWPM = (trueWPM) / desiredWPM 
+
+    timedText.forEach(item => {
+      item.time = item.time * scaledWPM
+    })
+
+    return {timedText, totalTime: totalTime * scaledWPM, wordCount: input.length}
   }
 
   useEffect(() => {
@@ -47,6 +93,7 @@ function App() {
   const SubmitForm = () => {
     StartCountdown()
     setSplittedText(text.split(' '))
+    console.log(processText(text.split(' '), wpm))
   }
 
   const startReading = () => {
