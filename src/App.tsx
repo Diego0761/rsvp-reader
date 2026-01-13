@@ -9,6 +9,7 @@ function App() {
   const [text, setText] = useState<string>('')
   const [splittedText, setSplittedText] = useState<string[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(0)
+  const [wpm, setWpm] = useState<number>(200)
 
   const [state, setState] = useState<State>('form')
 
@@ -38,7 +39,7 @@ function App() {
         }
         return prev + 1
       })
-    }, 250)
+    }, 60000 / wpm)
 
     return () => clearInterval(interval)
   }, [state])
@@ -75,9 +76,14 @@ function App() {
   return (
     <>
       <div className="text-white absolute top-0 left-0 p-4">state: {state}</div>
+      <div className="text-white absolute top-4 left-0 p-4">wpm: {wpm}</div>
 
       {state === 'form' && (
-        <MainForm submitForm={SubmitForm} getText={text => setText(text)} />
+        <MainForm
+          setWpm={e => setWpm(e)}
+          submitForm={SubmitForm}
+          getText={text => setText(text)}
+        />
       )}
 
       {state === 'countdown' && (
