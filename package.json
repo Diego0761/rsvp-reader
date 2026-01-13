@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/colors": "^3.0.0",
     "@tailwindcss/vite": "^4.1.18",
