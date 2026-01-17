@@ -9,6 +9,9 @@ function App() {
 
   const [text, setText] = useState<string>('')
   const [splittedText, setSplittedText] = useState<string[]>([])
+  const [timedText, setTimedText] = useState<{ word: string; time: number }[]>(
+    []
+  )
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(0)
   const [wpm, setWpm] = useState<number>(200)
 
@@ -19,6 +22,7 @@ function App() {
       setCountdown(3)
       setCurrentWordIndex(0)
       setSplittedText([])
+      setTimedText([])
       setText('')
       setState('form')
     }
@@ -28,8 +32,8 @@ function App() {
     const timedText: { word: string; time: number }[] = []
 
     const basetime = 60
-    const timeperchar = basetime / 5
-    const commonpunish = -40
+    const timeperchar = basetime / 6
+    const commonpunish = -20
     const pontuationbonus = 50
 
     let totalTime = 0
@@ -56,17 +60,21 @@ function App() {
         totalTime += pontuationbonus * 2
       }
 
-      timedText.push({ word, time})
+      timedText.push({ word, time })
     })
 
-    const trueWPM = input.length * 60000 / totalTime
-    const scaledWPM = (trueWPM) / desiredWPM 
+    const trueWPM = (input.length * 60000) / totalTime
+    const scaledWPM = trueWPM / desiredWPM
 
     timedText.forEach(item => {
       item.time = item.time * scaledWPM
     })
 
-    return {timedText, totalTime: totalTime * scaledWPM, wordCount: input.length}
+    return {
+      timedText,
+      totalTime: totalTime * scaledWPM,
+      wordCount: input.length
+    }
   }
 
   useEffect(() => {
@@ -74,26 +82,35 @@ function App() {
   }, [state])
 
   useEffect(() => {
-    if (state != 'reading') return
+    if (state != 'reading' || timedText.length === 0) return
 
-    const interval = setInterval(() => {
-      setCurrentWordIndex(prev => {
-        if (prev + 1 >= splittedText.length) {
-          endReading()
-          clearInterval(interval)
-          return prev
-        }
-        return prev + 1
-      })
-    }, 60000 / wpm)
+    let currentIndex = 0
+    let timeoutId: number
 
-    return () => clearInterval(interval)
-  }, [state])
+    const showNextWord = () => {
+      if (currentIndex >= timedText.length - 1) {
+        endReading()
+        return
+      }
+
+      currentIndex++
+      setCurrentWordIndex(currentIndex)
+      timeoutId = setTimeout(showNextWord, timedText[currentIndex].time)
+    }
+
+    // Start with the first word's timing
+    timeoutId = setTimeout(showNextWord, timedText[0].time)
+
+    return () => clearTimeout(timeoutId)
+  }, [state, timedText])
 
   const SubmitForm = () => {
     StartCountdown()
-    setSplittedText(text.split(' '))
-    console.log(processText(text.split(' '), wpm))
+    const words = text.split(' ')
+    setSplittedText(words)
+    const processed = processText(words, wpm)
+    setTimedText(processed.timedText)
+    console.log(processed)
   }
 
   const startReading = () => {
